@@ -1,0 +1,64 @@
+By flashing [nccgroup/Sniffle](https://github.com/nccgroup/Sniffle), you have converted your **Sonoff ZBDongle-P** (Texas Instruments CC2652P) adapters from Zigbee devices into hardware-level **Bluetooth Low Energy (BLE 4.x and BLE 5)** packet sniffers.
+
+---
+
+### What You Can Do With Two Sniffle Dongles
+
+A single Sniffle dongle is capable of scanning all primary advertising channels (37, 38, and 39) and following connections across standard 1M, 2M, and Coded (Long Range) PHYs. However, once a dongle locks onto and follows an active BLE connection, its radio is occupied hopping channels with that specific connection.
+
+Running two dongles simultaneously on separate serial ports unlocks several multi-device workflows:
+
+* **Simultaneous Target Tracking:** Sniff two independent encrypted or unencrypted BLE connections concurrently.
+* **Continuous Scanning + Connection Follower:** Keep Dongle A running as a wide-band advertisement scanner (`sniff_receiver.py` in scan mode) to monitor all local broadcasts and RSSI levels, while assigning Dongle B to lock onto a specific MAC address and capture a full session.
+* **Differential RF Capture:** Place one dongle close to the central device (e.g., smartphone) and the other near the peripheral (e.g., smart lock or sensor) to diagnose packet drop, signal attenuation, or transmission retries.
+
+---
+
+### Quick Start: Host Software Setup
+
+Sniffle operates via Python host scripts and exports standard PCAP files compatible with Wireshark and PCAP tools.
+
+#### 1. Install Dependencies
+
+Clone the repository and install the required Python packages:
+
+```bash
+git clone https://github.com/nccgroup/Sniffle.git
+cd Sniffle/python_cli
+pip install -r requirements.txt
+
+```
+
+#### 2. Identify the Dongles
+
+Plug in both dongles and identify their serial ports:
+
+* **Linux:** Check `/dev/ttyUSB0` and `/dev/ttyUSB1` (ensure your user is in the `dialout` group: `sudo usermod -aG dialout $USER`).
+* **macOS:** Check `/dev/cu.usbserial-*`.
+* **Windows:** Open Device Manager to find the assigned `COM` ports (e.g., `COM3`, `COM4`).
+
+#### 3. Capture Traffic via CLI
+
+Run captures independently per dongle by specifying the serial port and output PCAP:
+
+```bash
+# Dongle 1: Scan and record all advertisements
+python sniff_receiver.py -s /dev/ttyUSB0 -o ads_capture.pcap
+
+# Dongle 2: Target a specific device by MAC address and follow its connection
+python sniff_receiver.py -s /dev/ttyUSB1 -m AA:BB:CC:DD:EE:FF -o device_connection.pcap
+
+```
+
+---
+
+### Live Capture in Wireshark
+
+To stream directly into Wireshark instead of writing static files:
+
+1. Locate your Wireshark personal extcap folder:
+* Open Wireshark $\rightarrow$ **Help** $\rightarrow$ **About Wireshark** $\rightarrow$ **Folders** $\rightarrow$ **Extcap path**.
+
+
+2. Copy or symlink `Sniffle_extcap.py` from the `python_cli` folder into that directory.
+3. Restart Wireshark. Each plugged-in Sonoff dongle will appear as a distinct capture interface (e.g., `Sniffle /dev/ttyUSB0`), allowing you to set filters, channels, and target MACs directly from the gear icon next to the interface.

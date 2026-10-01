@@ -1,0 +1,22 @@
+[project]
+name = "sniffle"
+version = "0.2.0"
+description = "Super-Sniffle"
+readme = "README.md"
+authors = [
+    { name = "Nicolas Couture", email = "nicolas@stormvault.net" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "matplotlib>=3.10.9",
+    "numpy>=2.2.6",
+    "scipy>=1.15.3",
+]
+
+[project.scripts]
+sniffle = "sniffle.__main__:main"
+
+[build-system]
+requires = ["uv_build>=0.12.21,<0.13.0"]
+build-backend = "uv_build"
+

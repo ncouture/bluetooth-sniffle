@@ -1,0 +1,10 @@
+python sniff_receiver.py -s /dev/ttyUSB0 -b 921600
+
+# Dongle 1: Scan and record all advertisements
+python sniff_receiver.py -s /dev/ttyUSB0 -b 921600 -o ads_capture.pcap
+ 
+# Dongle 2: Target a specific device by MAC address and follow its connection
+python sniff_receiver.py -s /dev/ttyUSB1 -b 921600 -m AA:BB:CC:DD:EE:FF -o device_connection.pcap
+
+# Decode
+pcap_decoder.py /tmp/ads_cap.pcap --decode > /tmp/decoded-ads_cap.pcap
