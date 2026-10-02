@@ -96,3 +96,6 @@ Thumbs.db
 *.cap
 *.log
 sniffle_capture*.pcap*
+
+# Sensitive capture/analysis data (JSON)
+src/sniffle/data/*.json
