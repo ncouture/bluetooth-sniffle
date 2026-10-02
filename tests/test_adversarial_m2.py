@@ -154,13 +154,6 @@ class TestTopologyAAdversarial:
 class TestTopologyBAdversarial:
     """Adversarial challenge for Topology B (Dual-Channel Passive Observer)."""
 
-    @pytest.mark.xfail(
-        reason=(
-            "CRITICAL BUG: TopologyBOrchestrator lacks a hold-back jitter window / watermark, "
-            "causing out-of-order timestamp delivery when concurrent packets experience inter-channel jitter."
-        ),
-        strict=False,
-    )
     def test_topology_b_timestamp_ordering_under_jitter(self) -> None:
         """Inject 100 interleaved packets across Ch 37 and Ch 38 with simulated delivery jitter.
 
@@ -232,13 +225,6 @@ class TestTopologyBAdversarial:
             )
             assert timestamps == sorted(timestamps), "Stream timestamps are not monotonically non-decreasing"
 
-    @pytest.mark.xfail(
-        reason=(
-            "CRITICAL BUG: read_packets_batch(max_count=50) chunks buffers across arbitrary boundaries, "
-            "causing timestamp inversions when one channel has a higher packet rate than the other."
-        ),
-        strict=False,
-    )
     def test_topology_b_batch_boundary_rate_mismatch(self) -> None:
         """Verify sorting when Channel 37 generates 60 packets and Channel 38 generates 20 packets."""
         bus = VirtualRadioBus()
@@ -437,13 +423,6 @@ class TestSerialPortDiscoveryAdversarial:
             assert p2 == "/dev/ttyUSB0"
             assert p1 != p2
 
-    @pytest.mark.xfail(
-        reason=(
-            "HIGH BUG: allocate_dual_ports returns identical ports (port1 == port2) "
-            "when comports returns duplicate entries for the same device, violating collision avoidance."
-        ),
-        strict=False,
-    )
     def test_allocate_dual_ports_duplicate_comport_collision(self) -> None:
         """Assert collision avoidance when comports returns identical duplicate dongle paths.
 
@@ -469,5 +448,5 @@ class TestSerialPortDiscoveryAdversarial:
             assert len(discovered) == 1
             # If comports has duplicate items, discovery or allocation must deduplicate
             # and reject allocation due to insufficient distinct physical dongles
-            p1, p2 = allocate_dual_ports()
-            assert p1 != p2, f"COLLISION: allocate_dual_ports returned identical ports {p1!r} == {p2!r}"
+            with pytest.raises(RuntimeError):
+                allocate_dual_ports()
